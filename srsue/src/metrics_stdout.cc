@@ -63,7 +63,7 @@ void metrics_stdout::set_metrics(ue_metrics_t &metrics, const uint32_t period_us
   if(!do_print || ue == NULL)
     return;
 
-  if (!ue->is_attached()) {
+  if (metrics.stack.rrc.state != RRC_STATE_CONNECTED) {
     cout << "--- disconnected ---" << endl;
     return;
   }
@@ -72,19 +72,21 @@ void metrics_stdout::set_metrics(ue_metrics_t &metrics, const uint32_t period_us
   {
     cout << endl << "quemetrics:------------------------------------------------------------------------------------------------" << endl;
 
+    const auto rlc = metrics.stack.rlc;
+
     for(size_t n = 0; n < SRSLTE_N_RADIO_BEARERS; ++n) {
        // use capacity to determine if lcid is active
-       if(metrics.rlc.metrics[n].qmetrics.capacity) {
+       if(rlc.metrics[n].qmetrics.capacity) {
            cout  << "bearer"     << std::setw(2) << n;
-           cout  << ", mode="    << std::setw(1) << metrics.rlc.metrics[n].mode;
-           cout  << ", cap="     << std::setw(3) << metrics.rlc.metrics[n].qmetrics.capacity;
-           cout  << ", depth="   << std::setw(3) << metrics.rlc.metrics[n].qmetrics.currsize;
-           cout  << ", hw="      << std::setw(3) << metrics.rlc.metrics[n].qmetrics.highwater;
-           cout  << ", cleared=" << std::setw(3) << metrics.rlc.metrics[n].qmetrics.num_cleared;
-           cout  << ", pushed="  << std::setw(3) << metrics.rlc.metrics[n].qmetrics.num_push;
-           cout  << ", pusherr=" << std::setw(3) << metrics.rlc.metrics[n].qmetrics.num_push_fail;
-           cout  << ", poped="   << std::setw(3) << metrics.rlc.metrics[n].qmetrics.num_pop;
-           cout  << ", poperr="  << std::setw(3) << metrics.rlc.metrics[n].qmetrics.num_pop_fail;
+           cout  << ", mode="    << std::setw(1) << to_string(rlc.metrics[n].mode);
+           cout  << ", cap="     << std::setw(3) << rlc.metrics[n].qmetrics.capacity;
+           cout  << ", depth="   << std::setw(3) << rlc.metrics[n].qmetrics.currsize;
+           cout  << ", hw="      << std::setw(3) << rlc.metrics[n].qmetrics.highwater;
+           cout  << ", cleared=" << std::setw(3) << rlc.metrics[n].qmetrics.num_cleared;
+           cout  << ", pushed="  << std::setw(3) << rlc.metrics[n].qmetrics.num_push;
+           cout  << ", pusherr=" << std::setw(3) << rlc.metrics[n].qmetrics.num_push_fail;
+           cout  << ", poped="   << std::setw(3) << rlc.metrics[n].qmetrics.num_pop;
+           cout  << ", poperr="  << std::setw(3) << rlc.metrics[n].qmetrics.num_pop_fail;
            cout << endl;
        }
     }
@@ -94,17 +96,17 @@ void metrics_stdout::set_metrics(ue_metrics_t &metrics, const uint32_t period_us
 
     for(size_t n = 0; n < SRSLTE_N_MCH_LCIDS; ++n) {
         // use capacity to determine if lcid is active
-        if(metrics.rlc.mrb_metrics[n].qmetrics.capacity) {
+        if(rlc.mrb_metrics[n].qmetrics.capacity) {
            cout << "bearer"     << std::setw(2) << n;
-           cout << ", mode="    << std::setw(1) << metrics.rlc.mrb_metrics[n].mode;
-           cout << ", cap="     << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.capacity;
-           cout << ", depth="   << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.currsize;
-           cout << ", hw="      << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.highwater;
-           cout << ", cleared=" << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.num_cleared;
-           cout << ", pushed="  << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.num_push;
-           cout << ", pusherr=" << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.num_push_fail;
-           cout << ", poped="   << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.num_pop;
-           cout << ", poperr="  << std::setw(3) << metrics.rlc.mrb_metrics[n].qmetrics.num_pop_fail;
+           cout << ", mode="    << std::setw(1) << to_string(rlc.mrb_metrics[n].mode);
+           cout << ", cap="     << std::setw(3) << rlc.mrb_metrics[n].qmetrics.capacity;
+           cout << ", depth="   << std::setw(3) << rlc.mrb_metrics[n].qmetrics.currsize;
+           cout << ", hw="      << std::setw(3) << rlc.mrb_metrics[n].qmetrics.highwater;
+           cout << ", cleared=" << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_cleared;
+           cout << ", pushed="  << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_push;
+           cout << ", pusherr=" << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_push_fail;
+           cout << ", poped="   << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_pop;
+           cout << ", poperr="  << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_pop_fail;
            cout << endl;
          }
       }
@@ -120,25 +122,25 @@ void metrics_stdout::set_metrics(ue_metrics_t &metrics, const uint32_t period_us
     cout << " " << r;
     cout << float_to_string(metrics.phy.dl[r].rsrp, 2);
     cout << float_to_string(metrics.phy.dl[r].pathloss, 2);
-    cout << float_to_eng_string(metrics.phy.sync.cfo, 2);
+    cout << float_to_eng_string(metrics.phy.sync[r].cfo, 2);
     cout << float_to_string(metrics.phy.dl[r].mcs, 2);
     cout << float_to_string(metrics.phy.dl[r].sinr, 2);
     cout << float_to_string(metrics.phy.dl[r].turbo_iters, 2);
 
-    cout << float_to_eng_string((float)metrics.mac[r].rx_brate / period_usec * 1e6, 2);
-    if (metrics.mac[r].rx_pkts > 0) {
-      cout << float_to_string((float)100 * metrics.mac[r].rx_errors / metrics.mac[r].rx_pkts, 1) << "%";
+    cout << float_to_eng_string((float)metrics.stack.mac[r].rx_brate / period_usec * 1e6, 2);
+    if (metrics.stack.mac[r].rx_pkts > 0) {
+      cout << float_to_string((float)100 * metrics.stack.mac[r].rx_errors / metrics.stack.mac[r].rx_pkts, 1) << "%";
     } else {
       cout << float_to_string(0, 1) << "%";
     }
 
-    cout << float_to_string(metrics.phy.sync.ta_us, 2);
+    cout << float_to_string(metrics.phy.sync[r].ta_us, 2);
 
     cout << float_to_string(metrics.phy.ul[r].mcs, 2);
-    cout << float_to_eng_string((float)metrics.mac[r].ul_buffer, 2);
-    cout << float_to_eng_string((float)metrics.mac[r].tx_brate / period_usec * 1e6, 2);
-    if (metrics.mac[r].tx_pkts > 0) {
-      cout << float_to_string((float)100 * metrics.mac[r].tx_errors / metrics.mac[r].tx_pkts, 1) << "%";
+    cout << float_to_eng_string((float)metrics.stack.mac[r].ul_buffer, 2);
+    cout << float_to_eng_string((float)metrics.stack.mac[r].tx_brate / period_usec * 1e6, 2);
+    if (metrics.stack.mac[r].tx_pkts > 0) {
+      cout << float_to_string((float)100 * metrics.stack.mac[r].tx_errors / metrics.stack.mac[r].tx_pkts, 1) << "%";
     } else {
       cout << float_to_string(0, 1) << "%";
     }

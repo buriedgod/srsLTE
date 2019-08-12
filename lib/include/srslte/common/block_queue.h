@@ -51,15 +51,16 @@ public:
   // Callback functions for mutexed operations inside pop/push methods
   class call_mutexed_itf {
   public:
-    virtual void popping(myobj obj) = 0;
-    virtual void pushing(myobj obj) = 0;
+    virtual void popping(const myobj& obj) = 0;
+    virtual void pushing(const myobj& obj) = 0;
   };
 
-  block_queue<myobj>(int capacity = -1) {
+  explicit block_queue<myobj>(int capacity_ = -1)
+  {
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&cv_empty, NULL);
     pthread_cond_init(&cv_full, NULL);
-    this->capacity = capacity;
+    capacity         = capacity_;
     mutexed_callback = NULL;
     enable = true;
     num_threads = 0;
@@ -99,9 +100,13 @@ public:
     push_(value, true);
   }
 
+  void push(myobj&& value) { push_(std::move(value), true); }
+
   bool try_push(const myobj& value) {
     return push_(value, false);
   }
+
+  std::pair<bool, myobj> try_push(myobj&& value) { return push_(std::move(value), false); }
 
   bool try_pop(myobj *value) {
     return pop_(value, false);
@@ -127,9 +132,7 @@ public:
     }
   }
 
-  myobj front() {
-    return q.front();
-  }
+  const myobj& front() const { return q.front(); }
 
   size_t size() {
     pthread_mutex_lock(&mutex);
@@ -170,16 +173,15 @@ private:
       goto exit;
     }
     if (value) {
-      *value = q.front();
+      *value = std::move(q.front());
+    }
+    if (mutexed_callback) {
+      mutexed_callback->popping(*value); // FIXME: Value might be null!
     }
     q.pop();
+    ret = true;
     ++qmetrics.num_pop;
     qmetrics.currsize = q.size();
-
-    ret = true;
-    if (mutexed_callback) {
-      mutexed_callback->popping(*value);
-    }
     pthread_cond_signal(&cv_full);
   exit:
     num_threads--;
@@ -187,12 +189,8 @@ private:
     return ret;
   }
 
-  bool push_(const myobj& value, bool block) {
-    if (!enable) {
-      ++qmetrics.num_push_fail;
-      return false;
-    }
-    pthread_mutex_lock(&mutex);
+  bool check_queue_space_unlocked(bool block)
+  {
     num_threads++;
     bool ret = false;
     if (capacity > 0) {
@@ -201,26 +199,55 @@ private:
           pthread_cond_wait(&cv_full, &mutex);
         }
         if (!enable) {
-          ++qmetrics.num_push_fail;
-          goto exit;
+          num_threads--;
+          return false;
         }
       } else if (q.size() >= (uint32_t) capacity) {
-        ++qmetrics.num_push_fail;
-        goto exit;
+        num_threads--;
+        return false;
       }
     }
-    q.push(value);
-    ++qmetrics.num_push;
-    qmetrics.currsize = q.size();
-    qmetrics.highwater = std::max(qmetrics.highwater, q.size());
-
-    ret = true;
-    if (mutexed_callback) {
-      mutexed_callback->pushing(value);
-    }
-    pthread_cond_signal(&cv_empty);
-  exit:
     num_threads--;
+    return true;
+  }
+
+  std::pair<bool, myobj> push_(myobj&& value, bool block)
+  {
+    if (!enable) {
+      return std::make_pair(false, std::move(value));
+    }
+    pthread_mutex_lock(&mutex);
+    bool ret = check_queue_space_unlocked(block);
+    if (ret) {
+      if (mutexed_callback) {
+        mutexed_callback->pushing(value);
+      }
+      q.push(std::move(value));
+      pthread_cond_signal(&cv_empty);
+      ++qmetrics.num_push;
+      qmetrics.currsize = q.size();
+      qmetrics.highwater = std::max(qmetrics.highwater, q.size());
+    } else {
+      ++qmetrics.num_push_fail;
+    }
+    pthread_mutex_unlock(&mutex);
+    return std::make_pair(ret, std::move(value));
+  }
+
+  bool push_(const myobj& value, bool block)
+  {
+    if (!enable) {
+      return false;
+    }
+    pthread_mutex_lock(&mutex);
+    bool ret = check_queue_space_unlocked(block);
+    if (ret) {
+      if (mutexed_callback) {
+        mutexed_callback->pushing(value);
+      }
+      q.push(value);
+      pthread_cond_signal(&cv_empty);
+    }
     pthread_mutex_unlock(&mutex);
     return ret;
   }

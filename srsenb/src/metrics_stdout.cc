@@ -62,30 +62,32 @@ void metrics_stdout::toggle_print(bool b)
 
 void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_usec)
 {
-  if (!do_print || enb == NULL || metrics.rrc.n_ues == 0) {
+  if (!do_print || enb == NULL || metrics.stack.rrc.n_ues == 0) {
     return;
   }
 
   std::ios::fmtflags f(cout.flags()); // For avoiding Coverity defect: Not restoring ostream format
 
   if (++n_reports > 10) {
-    for(uint16_t ue = 0; ue < metrics.rrc.n_ues; ++ue) {
-      cout << endl << "quemetrics:------------------------------------------------------------------------------------------------" << endl;
+    const auto rlc = metrics.stack.rlc;
+
+    for(uint16_t ue = 0; ue < metrics.stack.rrc.n_ues; ++ue) {
+      cout << endl << "quemetrics:------------------------------------------------------------------------------------------------" << endl;    
 
       for(size_t n = 0; n < SRSLTE_N_RADIO_BEARERS; ++n) {
          // use capacity to determine if lcid is active
-         if(metrics.rlc[ue].metrics[n].qmetrics.capacity) {
-             cout  << "rnti="      << std::setw(1) << metrics.mac[ue].rnti;
+         if(rlc[ue].metrics[n].qmetrics.capacity) {
+             cout  << "rnti="      << std::setw(1) << metrics.stack.mac[ue].rnti;
              cout  << ", bearer"   << std::setw(2) << n;
-             cout  << ", mode="    << std::setw(1) << metrics.rlc[ue].metrics[n].mode;
-             cout  << ", cap="     << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.capacity;
-             cout  << ", depth="   << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.currsize;
-             cout  << ", hw="      << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.highwater;
-             cout  << ", cleared=" << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.num_cleared;
-             cout  << ", pushed="  << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.num_push;
-             cout  << ", pusherr=" << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.num_push_fail;
-             cout  << ", poped="   << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.num_pop;
-             cout  << ", poperr="  << std::setw(3) << metrics.rlc[ue].metrics[n].qmetrics.num_pop_fail;
+             cout  << ", mode="    << std::setw(3) << to_string(rlc[ue].metrics[n].mode);
+             cout  << ", cap="     << std::setw(3) << rlc[ue].metrics[n].qmetrics.capacity;
+             cout  << ", depth="   << std::setw(3) << rlc[ue].metrics[n].qmetrics.currsize;
+             cout  << ", hw="      << std::setw(3) << rlc[ue].metrics[n].qmetrics.highwater;
+             cout  << ", cleared=" << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_cleared;
+             cout  << ", pushed="  << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_push;
+             cout  << ", pusherr=" << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_push_fail;
+             cout  << ", poped="   << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_pop;
+             cout  << ", poperr="  << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_pop_fail;
              cout << endl;
          }
       }
@@ -94,19 +96,20 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
       cout << endl << "mrb quemetrics:--------------------------------------------------------------------------------------------" << endl;
 
       for(size_t n = 0; n < SRSLTE_N_MCH_LCIDS; ++n) {
+
           // use capacity to determine if lcid is active
-          if(metrics.rlc[ue].mrb_metrics[n].qmetrics.capacity) {
-             cout  << "rnti="     << std::setw(1) << metrics.mac[ue].rnti;
+          if(rlc[ue].mrb_metrics[n].qmetrics.capacity) {
+             cout  << "rnti="     << std::setw(1) << metrics.stack.mac[ue].rnti;
              cout << ", bearer"   << std::setw(2) << n;
-             cout << ", mode="    << std::setw(1) << metrics.rlc[ue].mrb_metrics[n].mode;
-             cout << ", cap="     << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.capacity;
-             cout << ", depth="   << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.currsize;
-             cout << ", hw="      << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.highwater;
-             cout << ", cleared=" << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.num_cleared;
-             cout << ", pushed="  << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.num_push;
-             cout << ", pusherr=" << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.num_push_fail;
-             cout << ", poped="   << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.num_pop;
-             cout << ", poperr="  << std::setw(3) << metrics.rlc[ue].mrb_metrics[n].qmetrics.num_pop_fail;
+             cout << ", mode="    << std::setw(3) << to_string(rlc[ue].mrb_metrics[n].mode);
+             cout << ", cap="     << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.capacity;
+             cout << ", depth="   << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.currsize;
+             cout << ", hw="      << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.highwater;
+             cout << ", cleared=" << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_cleared;
+             cout << ", pushed="  << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_push;
+             cout << ", pusherr=" << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_push_fail;
+             cout << ", poped="   << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_pop;
+             cout << ", poperr="  << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_pop_fail;
              cout << endl;
            }
         }
@@ -119,29 +122,30 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
     cout << "rnti  cqi    ri   mcs  brate   bler   snr   phr   mcs  brate   bler    bsr" << endl;
   }
 
-  for (int i = 0; i < metrics.rrc.n_ues; i++) {
-    if (metrics.mac[i].tx_errors > metrics.mac[i].tx_pkts) {
-      printf("tx caution errors %d > %d\n", metrics.mac[i].tx_errors, metrics.mac[i].tx_pkts);
+  for (int i = 0; i < metrics.stack.rrc.n_ues; i++) {
+    if (metrics.stack.mac[i].tx_errors > metrics.stack.mac[i].tx_pkts) {
+      printf("tx caution errors %d > %d\n", metrics.stack.mac[i].tx_errors, metrics.stack.mac[i].tx_pkts);
     }
-    if (metrics.mac[i].rx_errors > metrics.mac[i].rx_pkts) {
-      printf("rx caution errors %d > %d\n", metrics.mac[i].rx_errors, metrics.mac[i].rx_pkts);
+    if (metrics.stack.mac[i].rx_errors > metrics.stack.mac[i].rx_pkts) {
+      printf("rx caution errors %d > %d\n", metrics.stack.mac[i].rx_errors, metrics.stack.mac[i].rx_pkts);
     }
 
-    cout << std::hex << metrics.mac[i].rnti << " ";
-    cout << float_to_string(SRSLTE_MAX(0.1, metrics.mac[i].dl_cqi), 2);
-    cout << float_to_string(metrics.mac[i].dl_ri, 1);
+    cout << std::hex << metrics.stack.mac[i].rnti << " ";
+    cout << float_to_string(SRSLTE_MAX(0.1, metrics.stack.mac[i].dl_cqi), 2);
+    cout << float_to_string(metrics.stack.mac[i].dl_ri, 1);
     if (not isnan(metrics.phy[i].dl.mcs)) {
       cout << float_to_string(SRSLTE_MAX(0.1, metrics.phy[i].dl.mcs), 2);
     } else {
       cout << float_to_string(0, 2);
     }
-    if (metrics.mac[i].tx_brate > 0) {
-      cout << float_to_eng_string(SRSLTE_MAX(0.1, (float)metrics.mac[i].tx_brate / period_usec * 1e6), 2);
+    if (metrics.stack.mac[i].tx_brate > 0) {
+      cout << float_to_eng_string(SRSLTE_MAX(0.1, (float)metrics.stack.mac[i].tx_brate / period_usec * 1e6), 2);
     } else {
       cout << float_to_string(0, 2) << "";
     }
-    if (metrics.mac[i].tx_pkts > 0 && metrics.mac[i].tx_errors) {
-      cout << float_to_string(SRSLTE_MAX(0.1, (float)100 * metrics.mac[i].tx_errors / metrics.mac[i].tx_pkts), 1)
+    if (metrics.stack.mac[i].tx_pkts > 0 && metrics.stack.mac[i].tx_errors) {
+      cout << float_to_string(
+                  SRSLTE_MAX(0.1, (float)100 * metrics.stack.mac[i].tx_errors / metrics.stack.mac[i].tx_pkts), 1)
            << "%";
     } else {
       cout << float_to_string(0, 1) << "%";
@@ -151,24 +155,25 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
     } else {
       cout << float_to_string(0, 2);
     }
-    cout << float_to_string(metrics.mac[i].phr, 2);
+    cout << float_to_string(metrics.stack.mac[i].phr, 2);
     if (not isnan(metrics.phy[i].ul.mcs)) {
       cout << float_to_string(SRSLTE_MAX(0.1, metrics.phy[i].ul.mcs), 2);
     } else {
       cout << float_to_string(0, 2);
     }
-    if (metrics.mac[i].rx_brate > 0) {
-      cout << float_to_eng_string(SRSLTE_MAX(0.1, (float)metrics.mac[i].rx_brate / period_usec * 1e6), 2);
+    if (metrics.stack.mac[i].rx_brate > 0) {
+      cout << float_to_eng_string(SRSLTE_MAX(0.1, (float)metrics.stack.mac[i].rx_brate / period_usec * 1e6), 2);
     } else {
       cout << float_to_string(0, 2) << "";
     }
-    if (metrics.mac[i].rx_pkts > 0 && metrics.mac[i].rx_errors > 0) {
-      cout << float_to_string(SRSLTE_MAX(0.1, (float)100 * metrics.mac[i].rx_errors / metrics.mac[i].rx_pkts), 1)
+    if (metrics.stack.mac[i].rx_pkts > 0 && metrics.stack.mac[i].rx_errors > 0) {
+      cout << float_to_string(
+                  SRSLTE_MAX(0.1, (float)100 * metrics.stack.mac[i].rx_errors / metrics.stack.mac[i].rx_pkts), 1)
            << "%";
     } else {
       cout << float_to_string(0, 1) << "%";
     }
-    cout << float_to_eng_string(metrics.mac[i].ul_buffer, 2);
+    cout << float_to_eng_string(metrics.stack.mac[i].ul_buffer, 2);
     cout << endl;
   }
 
