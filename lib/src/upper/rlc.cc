@@ -108,7 +108,7 @@ void rlc::get_metrics(rlc_metrics_t &m)
                     it->first,
                     (it->second->get_num_rx_bytes()*8/static_cast<double>(1e6))/secs,
                     (it->second->get_num_tx_bytes()*8/static_cast<double>(1e6))/secs,
-                    to_string(it->second->get_mode()).c_str(),
+                    to_string(it->second->get_mode(), false).c_str(),
                     m.metrics[it->first].qmetrics.toString().c_str());
   }
 
@@ -120,7 +120,7 @@ void rlc::get_metrics(rlc_metrics_t &m)
     rlc_log->info("MCH_LCID=%d, RX throughput: %4.6f Mbps. mode %s, %s\n",
                   it->first,
                   (it->second->get_num_rx_bytes()*8/static_cast<double>(1e6))/secs,
-                  to_string(it->second->get_mode()).c_str(),
+                  to_string(it->second->get_mode(), false).c_str(),
                   m.mrb_metrics[it->first].qmetrics.toString().c_str());
   }
 

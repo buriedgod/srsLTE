@@ -79,7 +79,7 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
          if(rlc[ue].metrics[n].qmetrics.capacity) {
              cout  << "rnti="      << std::setw(1) << metrics.stack.mac[ue].rnti;
              cout  << ", bearer"   << std::setw(2) << n;
-             cout  << ", mode="    << std::setw(3) << to_string(rlc[ue].metrics[n].mode);
+             cout  << ", mode="    << std::setw(3) << to_string(rlc[ue].metrics[n].mode, false);
              cout  << ", cap="     << std::setw(3) << rlc[ue].metrics[n].qmetrics.capacity;
              cout  << ", depth="   << std::setw(3) << rlc[ue].metrics[n].qmetrics.currsize;
              cout  << ", hw="      << std::setw(3) << rlc[ue].metrics[n].qmetrics.highwater;
@@ -101,7 +101,7 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
           if(rlc[ue].mrb_metrics[n].qmetrics.capacity) {
              cout  << "rnti="     << std::setw(1) << metrics.stack.mac[ue].rnti;
              cout << ", bearer"   << std::setw(2) << n;
-             cout << ", mode="    << std::setw(3) << to_string(rlc[ue].mrb_metrics[n].mode);
+             cout << ", mode="    << std::setw(3) << to_string(rlc[ue].mrb_metrics[n].mode, false);
              cout << ", cap="     << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.capacity;
              cout << ", depth="   << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.currsize;
              cout << ", hw="      << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.highwater;
