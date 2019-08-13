@@ -92,7 +92,7 @@ public:
   uint32_t get_num_rx_bytes();
   void reset_metrics();
 
-  queue_metrics_t get_qmetrics(bool bReset);
+  queue_metrics_t get_qmetrics(bool bReset = false);
 
 private:
 
@@ -123,7 +123,7 @@ private:
     // Interface for Rx subclass
     void handle_control_pdu(uint8_t *payload, uint32_t nof_bytes);
 
-    queue_metrics_t get_qmetrics(bool bReset);
+    queue_metrics_t get_qmetrics(bool bReset = false);
 
   private:
 

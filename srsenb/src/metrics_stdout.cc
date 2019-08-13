@@ -69,53 +69,6 @@ void metrics_stdout::set_metrics(enb_metrics_t &metrics, const uint32_t period_u
   std::ios::fmtflags f(cout.flags()); // For avoiding Coverity defect: Not restoring ostream format
 
   if (++n_reports > 10) {
-    const auto rlc = metrics.stack.rlc;
-
-    for(uint16_t ue = 0; ue < metrics.stack.rrc.n_ues; ++ue) {
-      cout << endl << "quemetrics:------------------------------------------------------------------------------------------------" << endl;    
-
-      for(size_t n = 0; n < SRSLTE_N_RADIO_BEARERS; ++n) {
-         // use capacity to determine if lcid is active
-         if(rlc[ue].metrics[n].qmetrics.capacity) {
-             cout  << "rnti="      << std::setw(1) << metrics.stack.mac[ue].rnti;
-             cout  << ", bearer"   << std::setw(2) << n;
-             cout  << ", mode="    << std::setw(3) << to_string(rlc[ue].metrics[n].mode, false);
-             cout  << ", cap="     << std::setw(3) << rlc[ue].metrics[n].qmetrics.capacity;
-             cout  << ", depth="   << std::setw(3) << rlc[ue].metrics[n].qmetrics.currsize;
-             cout  << ", hw="      << std::setw(3) << rlc[ue].metrics[n].qmetrics.highwater;
-             cout  << ", cleared=" << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_cleared;
-             cout  << ", pushed="  << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_push;
-             cout  << ", pusherr=" << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_push_fail;
-             cout  << ", poped="   << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_pop;
-             cout  << ", poperr="  << std::setw(3) << rlc[ue].metrics[n].qmetrics.num_pop_fail;
-             cout << endl;
-         }
-      }
-      cout << "-----------------------------------------------------------------------------------------------------------" << endl;
-
-      cout << endl << "mrb quemetrics:--------------------------------------------------------------------------------------------" << endl;
-
-      for(size_t n = 0; n < SRSLTE_N_MCH_LCIDS; ++n) {
-
-          // use capacity to determine if lcid is active
-          if(rlc[ue].mrb_metrics[n].qmetrics.capacity) {
-             cout  << "rnti="     << std::setw(1) << metrics.stack.mac[ue].rnti;
-             cout << ", bearer"   << std::setw(2) << n;
-             cout << ", mode="    << std::setw(3) << to_string(rlc[ue].mrb_metrics[n].mode, false);
-             cout << ", cap="     << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.capacity;
-             cout << ", depth="   << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.currsize;
-             cout << ", hw="      << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.highwater;
-             cout << ", cleared=" << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_cleared;
-             cout << ", pushed="  << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_push;
-             cout << ", pusherr=" << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_push_fail;
-             cout << ", poped="   << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_pop;
-             cout << ", poperr="  << std::setw(3) << rlc[ue].mrb_metrics[n].qmetrics.num_pop_fail;
-             cout << endl;
-           }
-        }
-      cout << "-----------------------------------------------------------------------------------------------------------" << endl;
-     }
-
     n_reports = 0;
     cout << endl;
     cout << "------DL------------------------------UL----------------------------------" << endl;

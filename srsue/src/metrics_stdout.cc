@@ -70,49 +70,6 @@ void metrics_stdout::set_metrics(ue_metrics_t &metrics, const uint32_t period_us
 
   if(++n_reports > 10)
   {
-    cout << endl << "quemetrics:------------------------------------------------------------------------------------------------" << endl;
-
-    const auto rlc = metrics.stack.rlc;
-
-    for(size_t n = 0; n < SRSLTE_N_RADIO_BEARERS; ++n) {
-       // use capacity to determine if lcid is active
-       if(rlc.metrics[n].qmetrics.capacity) {
-           cout  << "bearer"     << std::setw(2) << n;
-           cout  << ", mode="    << std::setw(1) << to_string(rlc.metrics[n].mode, false);
-           cout  << ", cap="     << std::setw(3) << rlc.metrics[n].qmetrics.capacity;
-           cout  << ", depth="   << std::setw(3) << rlc.metrics[n].qmetrics.currsize;
-           cout  << ", hw="      << std::setw(3) << rlc.metrics[n].qmetrics.highwater;
-           cout  << ", cleared=" << std::setw(3) << rlc.metrics[n].qmetrics.num_cleared;
-           cout  << ", pushed="  << std::setw(3) << rlc.metrics[n].qmetrics.num_push;
-           cout  << ", pusherr=" << std::setw(3) << rlc.metrics[n].qmetrics.num_push_fail;
-           cout  << ", poped="   << std::setw(3) << rlc.metrics[n].qmetrics.num_pop;
-           cout  << ", poperr="  << std::setw(3) << rlc.metrics[n].qmetrics.num_pop_fail;
-           cout << endl;
-       }
-    }
-    cout << "-----------------------------------------------------------------------------------------------------------" << endl;
-
-    cout << endl << "mrb quemetrics:--------------------------------------------------------------------------------------------" << endl;
-
-    for(size_t n = 0; n < SRSLTE_N_MCH_LCIDS; ++n) {
-        // use capacity to determine if lcid is active
-        if(rlc.mrb_metrics[n].qmetrics.capacity) {
-           cout << "bearer"     << std::setw(2) << n;
-           cout << ", mode="    << std::setw(1) << to_string(rlc.mrb_metrics[n].mode, false);
-           cout << ", cap="     << std::setw(3) << rlc.mrb_metrics[n].qmetrics.capacity;
-           cout << ", depth="   << std::setw(3) << rlc.mrb_metrics[n].qmetrics.currsize;
-           cout << ", hw="      << std::setw(3) << rlc.mrb_metrics[n].qmetrics.highwater;
-           cout << ", cleared=" << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_cleared;
-           cout << ", pushed="  << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_push;
-           cout << ", pusherr=" << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_push_fail;
-           cout << ", poped="   << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_pop;
-           cout << ", poperr="  << std::setw(3) << rlc.mrb_metrics[n].qmetrics.num_pop_fail;
-           cout << endl;
-         }
-      }
-    cout << "-----------------------------------------------------------------------------------------------------------" << endl;
-
-
     n_reports = 0;
     cout << endl;
     cout << "----Signal--------------DL-------------------------------------UL----------------------" << endl;

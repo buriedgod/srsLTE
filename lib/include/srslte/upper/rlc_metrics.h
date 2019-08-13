@@ -41,6 +41,8 @@ struct rlc_metrics_t
 
   rlc_queue_metrics_t metrics[SRSLTE_N_RADIO_BEARERS];
   rlc_queue_metrics_t mrb_metrics[SRSLTE_N_MCH_LCIDS];
+
+  uint16_t rnti;
 };
 
 } // namespace srslte
